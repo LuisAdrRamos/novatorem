@@ -1,8 +1,15 @@
- {
-  "redirects": [
+{
+  "version": 2,
+  "builds": [
     {
-      "source": "/",
-      "destination": "/api/orchestrator.py"
+      "src": "api/orchestrator.py",
+      "use": "@vercel/python"
+    }
+  ],
+  "routes": [
+    {
+      "src": "/(.*)",
+      "dest": "api/orchestrator.py"
     }
   ]
 }

@@ -6,9 +6,16 @@ Abstracts away the core functionality from the music service providers (Spotify,
 
 from __future__ import annotations
 
+import sys
+import os
+
+# Asegurar que el directorio de la API esté en sys.path
+api_dir = os.path.dirname(os.path.abspath(__file__))
+if api_dir not in sys.path:
+    sys.path.insert(0, api_dir)
+
 import colorsys
 import json
-import os
 import random
 from io import BytesIO
 from typing import Any, Optional, Tuple
@@ -21,19 +28,34 @@ urllib3.disable_warnings(urllib3.exceptions.InsecureRequestWarning)
 from colorthief import ColorThief
 from flask import Flask, Response, render_template, request, redirect
 
-from .config import (
-    ColorPalette,
-    compact_svg_config,
-    svg_config,
-    template_config,
-    validate_background_type,
-    validate_hex_color,
-)
-from .exceptions import (
-    ImageProcessingError,
-    MusicWidgetError,
-    ServiceNotConfiguredError,
-)
+try:
+    from .config import (
+        ColorPalette,
+        compact_svg_config,
+        svg_config,
+        template_config,
+        validate_background_type,
+        validate_hex_color,
+    )
+    from .exceptions import (
+        ImageProcessingError,
+        MusicWidgetError,
+        ServiceNotConfiguredError,
+    )
+except ImportError:
+    from config import (
+        ColorPalette,
+        compact_svg_config,
+        svg_config,
+        template_config,
+        validate_background_type,
+        validate_hex_color,
+    )
+    from exceptions import (
+        ImageProcessingError,
+        MusicWidgetError,
+        ServiceNotConfiguredError,
+    )
 
 
 app = Flask(__name__)
@@ -549,7 +571,10 @@ def get_active_service() -> Tuple[str, Any]:
         ServiceNotConfiguredError: If no service is configured
     """
     # Import here to avoid circular imports
-    from . import lastfm, spotify
+    try:
+        from . import lastfm, spotify
+    except ImportError:
+        import lastfm, spotify
 
     if spotify.is_configured():
         return ("spotify", spotify)
